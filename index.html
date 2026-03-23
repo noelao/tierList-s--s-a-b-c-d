@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troops Tier List Maker</title>
+    <style>
+        :root {
+            --bg-dark: #1a1a1a;
+            --row-bg: #121212;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tier-container {
+            width: 100%;
+            max-width: 900px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .tier-row {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 90px;
+        }
+
+        .tier-label {
+            width: 80px;
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #000;
+        }
+
+        /* Warna Tier */
+        .s-plus { background-color: #ff7f7f; }
+        .s      { background-color: #ffbf7f; }
+        .a      { background-color: #ffff7f; }
+        .b      { background-color: #7fff7f; }
+        .c      { background-color: #7fbfff; }
+
+        .tier-items {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            gap: 10px;
+            flex-grow: 1;
+            background-color: var(--row-bg);
+            min-height: 80px;
+        }
+
+        /* Pool Area */
+        .pool-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #252525;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed #444;
+        }
+
+        .unit-img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: grab;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .unit-img:active { cursor: grabbing; }
+        .unit-img:hover { transform: scale(1.05); border-color: white; }
+
+        h1 { margin-bottom: 10px; }
+        p { color: #888; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Troops Tier List</h1>
+    <p>Geser gambar ke dalam kotak tier untuk menyusun peringkat.</p>
+
+    <div class="tier-container">
+        <div class="tier-row">
+            <div class="tier-label s-plus">S+</div>
+            <div id="s-plus" class="tier-items" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label s">S</div>
+            <div id="s" class="tier-items" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label a">A</div>
+            <div id="a" class="tier-items" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label b">B</div>
+            <div id="b" class="tier-items" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label b">D</div>
+            <div id="b" class="tier-items" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+    </div>
+
+    <div class="pool-container">
+        <h3>Daftar Troops</h3>
+        <div id="pool" class="tier-items" ondrop="drop(event)" ondragover="allowDrop(event)">
+            </div>
+    </div>
+
+    <script>
+        // 1. Fungsi Drag and Drop
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            
+            // Pastikan drop dilakukan pada container 'tier-items'
+            let target = ev.target;
+            while (target && !target.classList.contains('tier-items')) {
+                target = target.parentElement;
+            }
+            
+            if (target) {
+                target.appendChild(draggedElement);
+            }
+        }
+
+        // 2. Load Gambar dari JSON
+        const pool = document.getElementById('pool');
+
+        fetch('images.json')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach((fileName, index) => {
+                    const img = document.createElement('img');
+                    img.src = `images/${fileName}`;
+                    img.className = 'unit-img';
+                    img.id = `troop-${index}`; // ID unik untuk drag & drop
+                    img.draggable = true;
+                    img.ondragstart = drag;
+                    
+                    pool.appendChild(img);
+                });
+            })
+            .catch(err => {
+                console.error("Gagal memuat images.json. Pastikan script node sudah dijalankan.", err);
+                pool.innerHTML = "<p style='color:red'>Gagal memuat gambar. Jalankan script Node dulu!</p>";
+            });
+    </script>
+</body>
+</html>
